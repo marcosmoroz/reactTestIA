@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useProductosStore } from '../store/productosStore';
+import { useProductosStore } from './productos';
 import { CircularProgress, Box, Typography } from '@mui/material';
 
 const Productos = () => {

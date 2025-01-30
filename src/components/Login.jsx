@@ -1,48 +1,45 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
+import { useState } from 'react';
+import { useAuthStore } from "../store/authStore";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 import { tokens } from "../theme";
-import { useNavigate } from 'react-router-dom';
+import { useTheme } from "@mui/material/styles";
+import { Box, TextField, Button, Typography } from "@mui/material"; 
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: ''
-  });
-  const [loading, setLoading] = useState(false);
+  const [username, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { login } = useAuthStore();
   const navigate = useNavigate();
-
-  // useEffect para redirigir si hay un token
-  useEffect(() => {
-    if (localStorage.getItem('token')) {
-      navigate('/productos');
-    }
-  }, [navigate]);
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8080/apigateway/v1/auth/login', credentials);
-      localStorage.setItem('token', response.data.datos);
-      onLogin(); // Llamar aquí después de guardar el token
+      const response = await axios.post("http://localhost:8080/apigateway/v1/auth/login", {
+        username,
+        password
+      });
+      login(response.data.datos);
+      navigate(location.state?.from?.pathname || "/dashboard");
     } catch (error) {
-      console.error('Error en el login:', error);
-      alert('Error al iniciar sesión. Verifica tus credenciales.');
+      console.error("Error en el login:", error);
+      alert("Credenciales incorrectas");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
+    <Box 
+      display="flex" 
+      justifyContent="center" 
+      alignItems="center" 
       minHeight="100vh"
-      bgcolor={colors.primary[400]}
     >
       <Box
         component="form"
@@ -51,7 +48,7 @@ const Login = ({ onLogin }) => {
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          backgroundColor: colors.primary[400],
+          backgroundColor: colors.primary,
           padding: 4,
           borderRadius: 2,
           boxShadow: 3,
@@ -59,29 +56,29 @@ const Login = ({ onLogin }) => {
           maxWidth: '400px',
         }}
       >
-        <Typography variant="h4" component="h1" textAlign="center" color={colors.grey[100]}>
+        <Typography variant="h4" component="h1" textAlign="center" color={colors.grey}>
           Iniciar Sesión
         </Typography>
         
         <TextField
           fullWidth
           label="Usuario"
-          value={credentials.username}
-          onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+          value={username}
+          onChange={(e) => setEmail(e.target.value)}
           required
           disabled={loading}
           sx={{
-            backgroundColor: colors.primary[400],
+            backgroundColor: colors.primary,
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                borderColor: colors.grey[100],
+                borderColor: colors.grey,
               },
             },
             '& .MuiInputLabel-root': {
-              color: colors.grey[100],
+              color: colors.grey,
             },
             '& .MuiOutlinedInput-input': {
-              color: colors.grey[100],
+              color: colors.grey,
             },
           }}
         />
@@ -90,22 +87,22 @@ const Login = ({ onLogin }) => {
           fullWidth
           label="Contraseña"
           type="password"
-          value={credentials.password}
-          onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
           disabled={loading}
           sx={{
-            backgroundColor: colors.primary[400],
+            backgroundColor: colors.primary,
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                borderColor: colors.grey[100],
+                borderColor: colors.grey,
               },
             },
             '& .MuiInputLabel-root': {
-              color: colors.grey[100],
+              color: colors.grey,
             },
             '& .MuiOutlinedInput-input': {
-              color: colors.grey[100],
+              color: colors.grey,
             },
           }}
         />
@@ -114,13 +111,13 @@ const Login = ({ onLogin }) => {
           type="submit"
           variant="contained"
           sx={{
-            backgroundColor: colors.blueAccent[700],
-            color: colors.grey[100],
+            backgroundColor: colors.blueAccent,
+            color: colors.grey,
             fontSize: "14px",
             fontWeight: "bold",
             padding: "10px 20px",
             '&:hover': {
-              backgroundColor: colors.blueAccent[800],
+              backgroundColor: colors.blueAccent,
             },
           }}
           disabled={loading}

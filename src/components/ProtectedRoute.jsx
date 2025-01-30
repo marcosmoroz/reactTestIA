@@ -1,16 +1,18 @@
-// src/components/ProtectedRoute.jsx
-import { Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = !!localStorage.getItem('token');
-  
-  console.log('ProtectedRoute - isAuthenticated:', isAuthenticated); // Para debugging
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-  
-  return children;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  return localStorage.getItem('token') ? children : null;
 };
 
 export default ProtectedRoute;

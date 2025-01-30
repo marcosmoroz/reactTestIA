@@ -1,63 +1,76 @@
+import React, { createContext, useContext, useState, useMemo } from "react";
 import { Box, IconButton, useTheme, Button } from "@mui/material";
-import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { ColorModeContext, tokens } from "../../theme";
-import InputBase from "@mui/material/InputBase";
+import { designTokens as tokens } from "../../theme"; // Asegúrate de que esta ruta sea correcta
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
-import SearchIcon from "@mui/icons-material/Search";
+import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
+
+// Crear el contexto directamente en este archivo
+const ColorModeContext = createContext();
+
+// Proveedor del contexto para manejar el tema
+const ColorModeProvider = ({ children }) => {
+  const [mode, setMode] = useState("light");
+
+  const toggleColorMode = () => {
+    setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+  };
+
+  const colorMode = useMemo(
+    () => ({ mode, toggleColorMode }),
+    [mode]
+  );
+
+  return (
+    <ColorModeContext.Provider value={colorMode}>
+      {children}
+    </ColorModeContext.Provider>
+  );
+};
 
 const Topbar = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  //Devuelve los colores por tema:
-  const colors = tokens(theme.palette.mode);
-
-  //Usa un contexto global para obtenerlo
-  const colorMode = useContext(ColorModeContext);
-
-  const isRootPath = location.pathname === '/';
+  const colors = tokens(theme.palette.mode); // Usa los colores según el tema actual
+  const colorMode = useContext(ColorModeContext); // Obtén el contexto para manejar el tema
+  const isRootPath = location.pathname === "/"; // Comprueba si estás en la raíz
 
   const handleClick = () => {
-    console.log(location.pathname)
-    navigate(-1)
-  }
+    console.log(location.pathname);
+    navigate(-1); // Navega a la página anterior
+  };
 
   return (
-    //Box es como un div pero de MUI. Le podes pasar las propiedades mas facil
-
     <Box display="flex" justifyContent="space-between" p={2}>
-      
-      {/* SEARCH BAR */}
+      {/* Barra de búsqueda y botón "Atrás" */}
       <Box
         display="flex"
-        //El 400 es como para darle la intensidad del color
-        backgroundColor={colors.primary[400]}
+        backgroundColor={colors.primary} // Aplica colores personalizados
         borderRadius="3px"
       >
         {!isRootPath && (
-        <Button
-          sx={{ background: colors.greenAccent[500] }}
-          onClick={handleClick}
-          variant="contained"
-          startIcon={<SkipPreviousIcon />}
-        >
-          Atrás
-        </Button>
-      )}
+          <Button
+            sx={{ background: colors.greenAccent}}
+            onClick={handleClick}
+            variant="contained"
+            startIcon={<SkipPreviousIcon />}
+          >
+            Atrás
+          </Button>
+        )}
       </Box>
 
-      {/* ICONS */}
+      {/* Íconos */}
       <Box display="flex">
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? (
-            <DarkModeOutlinedIcon />
-          ) : (
             <LightModeOutlinedIcon />
+          ) : (
+            <DarkModeOutlinedIcon />
           )}
         </IconButton>
         <IconButton>
@@ -70,9 +83,15 @@ const Topbar = () => {
           <PersonOutlinedIcon />
         </IconButton>
       </Box>
-
     </Box>
   );
 };
 
-export default Topbar;
+// Exportar el proveedor y el componente
+const AppWithProvider = () => (
+  <ColorModeProvider>
+    <Topbar />
+  </ColorModeProvider>
+);
+
+export default AppWithProvider;

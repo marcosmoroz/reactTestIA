@@ -20,87 +20,21 @@ import { useProductosStore } from "./store/productos";
 import { useCategoriasStore } from "./store/categorias";
 import { useUnidadesStore } from "./store/unidades";
 import Login from './components/Login';
+import { useAuthStore } from "./store/authStore"; // Asegúrate de tener este store
 
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+  const { isAuthenticated } = useAuthStore(); // Ahora viene del store
   const cargaInicialConErroresSucedio = useRef(false);
   const { obtenerArticulos } = useArticulosStore();
   const { obtenerProductos } = useProductosStore();
   const { obtenerCategorias } = useCategoriasStore();
   const { obtenerUnidades } = useUnidadesStore();
-
   const location = useLocation();
 
-  const fetchArticulos = async () => {
-    try {
-      await obtenerArticulos();
-    } catch (error) {
-      if (!cargaInicialConErroresSucedio.current) {
-        agregarError(error.message);
-        cargaInicialConErroresSucedio.current = true;
-      }
-    }
-  };
-
-  const fetchProductos = async () => {
-    try {
-      await obtenerProductos();
-    } catch (error) {
-      if (!cargaInicialConErroresSucedio.current) {
-        agregarError(error.message);
-        cargaInicialConErroresSucedio.current = true;
-      }
-    }
-  };
-
-  const fetchUnidades = async () => {
-    try {
-      await obtenerUnidades();
-    } catch (error) {
-      if (!cargaInicialConErroresSucedio.current) {
-        agregarError(error.message);
-        cargaInicialConErroresSucedio.current = true;
-      }
-    }
-  };
-
-  const fetchCategorias = async () => {
-    try {
-      await obtenerCategorias();
-    } catch (error) {
-      if (!cargaInicialConErroresSucedio.current) {
-        agregarError(error.message);
-        cargaInicialConErroresSucedio.current = true;
-      }
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await Promise.all([fetchArticulos(), fetchProductos(), fetchUnidades(), fetchCategorias()]);
-      } catch (error) {
-        agregarError(error.message);
-      }
-    };
-
-    if (isAuthenticated) {
-      fetchData();
-    }
-  }, [isAuthenticated]);
-
-  // Componente de rutas protegidas
-  const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) {
-      return <Navigate to="/login" replace />;
-    }
-    return children;
-  };
-
-  // Componente que envuelve el layout principal
+  // Componente de layout principal
   const MainLayout = ({ children }) => (
     <div className="app">
       <Sidebar isSidebar={isSidebar} isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
@@ -111,123 +45,74 @@ function App() {
     </div>
   );
 
-  // No mostrar el layout en la página de login
-  const shouldShowLayout = location.pathname !== '/login';
+  const ProtectedRoute = ({ children }) => {
+    const { isAuthenticated } = useAuthStore();
+    const location = useLocation();
+  
+    if (!isAuthenticated) {
+      return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+    
+    return <MainLayout>{children}</MainLayout>;
+  };
+
+// En App.jsx
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      await Promise.all([
+        obtenerArticulos(),
+        obtenerProductos(),
+        obtenerUnidades(),
+        obtenerCategorias()
+      ]);
+    } catch (error) {
+      console.error("Error inicial:", error);
+    }
+  };
+
+  if (isAuthenticated) {
+    fetchData();
+  }
+}, [isAuthenticated]); // Asegúrate de incluir todas las dependencias necesarias
 
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {shouldShowLayout ? (
-          <Routes>
-            <Route path="/login" element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Login onLogin={() => setIsAuthenticated(true)} />
-            } />
-            
-            <Route path="/" element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Navigate to="/login" replace />
-            } />
+        <Routes>
+          {/* Rutas públicas */}
+          <Route path="/login" element={
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Login />
+            )
+          } />
 
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Dashboard />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
+          {/* Rutas protegidas */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/articulos" element={<Articulos />} />
+            <Route path="/categorias" element={<Categorias />} />
+            <Route path="/productos" element={<Productos />} />
+            <Route path="/invoices" element={<Invoices />} />
+            <Route path="/nuevo-articulo/:id?" element={<FormArticulo />} />
+            <Route path="/nueva-categoria/:id?" element={<FormCategoria />} />
+            <Route path="/nuevo-producto/:id?" element={<FormProducto />} />
+            <Route path="/computo-personalizado" element={<ComputoPersonalizado />} />
+            <Route path="/unidades" element={<Unidades />} />
+            <Route path="/nueva-unidad/:id?" element={<FormUnidad />} />
+          </Route>
 
-            <Route path="/articulos" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Articulos />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/categorias" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Categorias />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/productos" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Productos />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/invoices" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Invoices />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/nuevo-articulo/:id?" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <FormArticulo />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/nueva-categoria/:id?" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <FormCategoria />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/nuevo-producto/:id?" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <FormProducto />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/computo-personalizado" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <ComputoPersonalizado />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/unidades" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Unidades />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/nueva-unidad/:id?" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <FormUnidad />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-          </Routes>
-        ) : (
-          <Routes>
-            <Route path="/login" element={
-              <Login onLogin={() => setIsAuthenticated(true)} />
-            } />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        )}
+          {/* Redirecciones */}
+          <Route path="/" element={
+            isAuthenticated ? 
+              <Navigate to="/dashboard" replace /> : 
+              <Navigate to="/login" replace />
+          } />
+          <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
+        </Routes>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

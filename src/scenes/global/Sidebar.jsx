@@ -25,7 +25,7 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
     <MenuItem
       active={selected === title}
       style={{
-        color: colors.grey[100],
+        color: colors.grey,
       }}
       onClick={() => setSelected(title)}
       icon={icon}
@@ -49,7 +49,7 @@ const Sidebar = ({ isSidebar, isCollapsed, setIsCollapsed }) => {
         height: '100%', // Ajusta la altura según tus necesidades
         zIndex: 1000, // Ajusta el índice Z según sea necesario
         "& .pro-sidebar-inner": {
-          background: `${colors.primary[400]} !important`,
+          background: `${colors.primary} !important`,
         },
         "& .pro-icon-wrapper": {
           backgroundColor: "transparent !important",
@@ -74,7 +74,7 @@ const Sidebar = ({ isSidebar, isCollapsed, setIsCollapsed }) => {
             icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
             style={{
               margin: "10px 0 20px 0",
-              color: colors.grey[100],
+              color: colors.grey,
             }}
           >
             {!isCollapsed && (
@@ -84,7 +84,7 @@ const Sidebar = ({ isSidebar, isCollapsed, setIsCollapsed }) => {
                 alignItems="center"
                 ml="15px"
               >
-                <Typography variant="h3" color={colors.grey[100]}>
+                <Typography variant="h3" color={colors.grey}>
                   Blues Building
                 </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
@@ -108,13 +108,13 @@ const Sidebar = ({ isSidebar, isCollapsed, setIsCollapsed }) => {
               <Box textAlign="center">
                 <Typography
                   variant="h2"
-                  color={colors.grey[100]}
+                  color={colors.grey}
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
                   David Caputo
                 </Typography>
-                <Typography variant="h5" color={colors.greenAccent[500]}>
+                <Typography variant="h5" color={colors.greenAccent}>
                   Administrador
                 </Typography>
               </Box>
@@ -132,7 +132,7 @@ const Sidebar = ({ isSidebar, isCollapsed, setIsCollapsed }) => {
 
             <Typography
               variant="h6"
-              color={colors.grey[300]}
+              color={colors.grey}
               sx={{ m: "15px 0 5px 20px" }}
             >
               ABMs
@@ -175,7 +175,7 @@ const Sidebar = ({ isSidebar, isCollapsed, setIsCollapsed }) => {
 
             <Typography
               variant="h6"
-              color={colors.grey[300]}
+              color={colors.grey}
               sx={{ m: "15px 0 5px 20px" }}
             >
               Cálculos

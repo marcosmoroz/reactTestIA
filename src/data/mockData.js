@@ -1,4 +1,9 @@
+// En mockData.js
 import { tokens } from "../theme";
+
+// Define el modo (dark/light)
+const mode = "dark"; 
+const colors = tokens(mode);
 
 export const mockDataArticulos = [
   {
@@ -979,7 +984,7 @@ export const mockPieData = [
 export const mockLineData = [
   {
     id: "japan",
-    color: tokens("dark").greenAccent[500],
+    color: tokens("dark").palette.secondary.main, // Usa la paleta correcta
     data: [
       {
         x: "plane",
@@ -1033,7 +1038,7 @@ export const mockLineData = [
   },
   {
     id: "france",
-    color: tokens("dark").blueAccent[300],
+    color: tokens("dark").palette.primary.light,
     data: [
       {
         x: "plane",
@@ -1087,7 +1092,7 @@ export const mockLineData = [
   },
   {
     id: "us",
-    color: tokens("dark").redAccent[200],
+    color: tokens("dark").palette.error.main,
     data: [
       {
         x: "plane",
